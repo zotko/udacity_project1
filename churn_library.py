@@ -1,4 +1,4 @@
-# Project: Predict Customer Churn
+"""Project: Predict Customer Churn"""
 # Author: Mykola
 # Created: 10.02.2022
 
@@ -37,19 +37,22 @@ def perform_eda(df):
     path_eda = './images/eda/'
 
     plt.figure(figsize=(20, 10))
-    df.Marital_Status.value_counts('normalize').plot(kind='bar')
+    df.Marital_Status.value_counts('normalize').plot(kind='bar',
+                                                     title="Marital status distribution",
+                                                     ylabel='Frequency')
     plt.savefig(path_eda + 'marital_status_distribution.png')
 
     # histograms
     for col in ['Churn', 'Customer_Age', 'Total_Trans_Ct']:
         plt.figure(figsize=(20, 10))
-        df['Churn'].hist()
+        df['Churn'].plot(kind='hist', xlabel=col, ylabel='Frequency', title=f'{col} distribution')
         plt.savefig(path_eda + f'{col.lower()}_hist.png')
 
     # heatmap
     plt.figure(figsize=(20, 10))
     sns.heatmap(df.corr(), annot=False, cmap='Dark2_r', linewidths=2)
-    plt.savefig(path_eda + f'heatmap.png')
+    plt.title('Heatmap')
+    plt.savefig(path_eda + 'heatmap.png')
 
 
 def encoder_helper(df, category_lst, response=''):
@@ -146,10 +149,13 @@ def classification_report_image(y_train,
     plt.savefig(results_path + 'rf_results.png')
 
     plt.figure(figsize=(5, 5))
-    plt.text(0.01, 1.25, str('Logistic Regression Train'), {'fontsize': 10}, fontproperties='monospace')
-    plt.text(0.01, 0.05, str(classification_report(y_train, y_train_preds_lr)), {'fontsize': 10},
+    plt.text(0.01, 1.25, str('Logistic Regression Train'), {'fontsize': 10},
              fontproperties='monospace')
-    plt.text(0.01, 0.6, str('Logistic Regression Test'), {'fontsize': 10}, fontproperties='monospace')
+    plt.text(0.01, 0.05, str(classification_report(y_train, y_train_preds_lr)),
+             {'fontsize': 10},
+             fontproperties='monospace')
+    plt.text(0.01, 0.6, str('Logistic Regression Test'), {'fontsize': 10},
+             fontproperties='monospace')
     plt.text(0.01, 0.7, str(classification_report(y_test, y_test_preds_lr)), {'fontsize': 10},
              fontproperties='monospace')
     plt.axis('off')
@@ -258,13 +264,13 @@ cat_columns = [
     'Card_Category'
 ]
 
-df = encoder_helper(df, category_lst=cat_columns, response='_Churn')
-
-X_train, X_test, y_train, y_test = perform_feature_engineering(df)
-
-train_models(X_train, X_test, y_train, y_test)
-
-rfc_model = joblib.load('./models/rfc_model.pkl')
-lr_model = joblib.load('./models/logistic_model.pkl')
-
-feature_importance_plot(rfc_model, X_test, 'images/results/')
+# df = encoder_helper(df, category_lst=cat_columns, response='_Churn')
+#
+# X_train, X_test, y_train, y_test = perform_feature_engineering(df)
+#
+# train_models(X_train, X_test, y_train, y_test)
+#
+# rfc_model = joblib.load('./models/rfc_model.pkl')
+# lr_model = joblib.load('./models/logistic_model.pkl')
+#
+# feature_importance_plot(rfc_model, X_test, 'images/results/')

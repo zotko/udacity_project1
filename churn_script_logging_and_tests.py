@@ -2,10 +2,13 @@
 # Author: Mykola
 # Created: 10.02.2022
 
-import os
 import logging
+import os
+
 import numpy as np
-from churn_library import import_data, perform_eda, encoder_helper, perform_feature_engineering, train_models
+
+from churn_library import import_data, perform_eda, encoder_helper, \
+    perform_feature_engineering, train_models
 
 # import churn_library_solution as cls
 
@@ -54,10 +57,10 @@ def test_encoder_helper(encoder_helper, df_test):
     """
     test encoder helper
     """
-    df_test = encoder_helper(df_test, category_lst=cat_columns, response=response)
+    df_test = encoder_helper(df_test, category_lst=cat_columns, response=RESPONSE)
 
     try:
-        assert set(df_test.columns).issuperset([col + response for col in cat_columns])
+        assert set(df_test.columns).issuperset([col + RESPONSE for col in cat_columns])
     except AssertionError:
         logging.error('Testing test_encoder_helper: missing categorical columns.')
     logging.info('Testing test_encoder_helper: SUCCESS')
@@ -67,20 +70,20 @@ def test_perform_feature_engineering(perform_feature_engineering, df_test):
     """
     test perform_feature_engineering
     """
-    X_train, X_test, y_train, y_test = perform_feature_engineering(df_test)
+    x_train, x_test, y_train, y_test = perform_feature_engineering(df_test)
 
     try:
-        assert (len(X_train) == len(y_train)) and (len(X_test)) == len(y_test)
+        assert (len(x_train) == len(y_train)) and (len(x_test)) == len(y_test)
     except AssertionError:
         logging.error('Testing perform_feature_engineering: wrong shape.')
     logging.info('Testing perform_feature_engineering: SUCCESS')
 
 
-def test_train_models(train_models, X_train, X_test, y_train, y_test):
+def test_train_models(train_models, x_train, x_test, y_train, y_test):
     """
     test train_models
     """
-    train_models(X_train, X_test, y_train, y_test)
+    train_models(x_train, x_test, y_train, y_test)
 
     try:
         assert len(os.listdir("./models")) == 2
@@ -98,7 +101,7 @@ if __name__ == "__main__":
     df_test['Churn'] = np.where(df_test['Attrition_Flag'] == 'Existing Customer', 0, 1)
 
     test_eda(perform_eda, df_test)
-    response = '_Churn'
+    RESPONSE = '_Churn'
     cat_columns = [
         'Gender',
         'Education_Level',
@@ -107,9 +110,9 @@ if __name__ == "__main__":
         'Card_Category'
     ]
     test_encoder_helper(encoder_helper, df_test)
-    df_test = encoder_helper(df_test, category_lst=cat_columns, response=response)
+    df_test = encoder_helper(df_test, category_lst=cat_columns, response=RESPONSE)
 
     test_perform_feature_engineering(perform_feature_engineering, df_test)
-    X_train, X_test, y_train, y_test = perform_feature_engineering(df_test)
+    x_train, x_test, y_train, y_test = perform_feature_engineering(df_test)
 
-    test_train_models(train_models, X_train, X_test, y_train, y_test)
+    test_train_models(train_models, x_train, x_test, y_train, y_test)
