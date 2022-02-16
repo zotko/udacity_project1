@@ -36,11 +36,11 @@ def test_import(import_data):
         raise err
 
 
-def test_eda(perform_eda):
+def test_eda(perform_eda, df_test):
     """
     test perform eda function
     """
-    perform_eda(df)
+    perform_eda(df_test)
 
     try:
         assert len(os.listdir("./images/eda")) == 5
@@ -50,26 +50,24 @@ def test_eda(perform_eda):
     logging.info('Testing perform_eda: SUCCESS')
 
 
-def test_encoder_helper(encoder_helper):
+def test_encoder_helper(encoder_helper, df_test):
     """
     test encoder helper
     """
-    df = import_data("./data/bank_data.csv")
-    response = '_Churn'
-    df = encoder_helper(df, category_lst=cat_columns, response=response)
+    df_test = encoder_helper(df_test, category_lst=cat_columns, response=response)
 
     try:
-        assert set(df.columns).issuperset([col + response for col in cat_columns])
+        assert set(df_test.columns).issuperset([col + response for col in cat_columns])
     except AssertionError:
         logging.error('Testing test_encoder_helper: missing categorical columns.')
     logging.info('Testing test_encoder_helper: SUCCESS')
 
 
-def test_perform_feature_engineering(perform_feature_engineering):
+def test_perform_feature_engineering(perform_feature_engineering, df_test):
     """
     test perform_feature_engineering
     """
-    X_train, X_test, y_train, y_test = perform_feature_engineering(df)
+    X_train, X_test, y_train, y_test = perform_feature_engineering(df_test)
 
     try:
         assert (len(X_train) == len(y_train)) and (len(X_test)) == len(y_test)
@@ -78,12 +76,10 @@ def test_perform_feature_engineering(perform_feature_engineering):
     logging.info('Testing perform_feature_engineering: SUCCESS')
 
 
-def test_train_models(train_models):
+def test_train_models(train_models, X_train, X_test, y_train, y_test):
     """
     test train_models
     """
-    df = import_data("./data/bank_data.csv")
-    X_train, X_test, y_train, y_test = perform_feature_engineering(df)
     train_models(X_train, X_test, y_train, y_test)
 
     try:
@@ -98,11 +94,11 @@ if __name__ == "__main__":
     test_import(import_data)
 
     df = import_data("./data/bank_data.csv")
-    df['Churn'] = np.where(df['Attrition_Flag'] == 'Existing Customer', 0, 1)
+    df_test = df.iloc[:100]
+    df_test['Churn'] = np.where(df_test['Attrition_Flag'] == 'Existing Customer', 0, 1)
 
-    test_eda(perform_eda)
-    test_encoder_helper(encoder_helper)
-
+    test_eda(perform_eda, df_test)
+    response = '_Churn'
     cat_columns = [
         'Gender',
         'Education_Level',
@@ -110,7 +106,10 @@ if __name__ == "__main__":
         'Income_Category',
         'Card_Category'
     ]
-    df = encoder_helper(df, category_lst=cat_columns, response='_Churn')
+    test_encoder_helper(encoder_helper, df_test)
+    df_test = encoder_helper(df_test, category_lst=cat_columns, response=response)
 
-    test_perform_feature_engineering(perform_feature_engineering)
-    test_train_models(train_models)
+    test_perform_feature_engineering(perform_feature_engineering, df_test)
+    X_train, X_test, y_train, y_test = perform_feature_engineering(df_test)
+
+    test_train_models(train_models, X_train, X_test, y_train, y_test)
